@@ -105,7 +105,9 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-gray-400">{new Date(project.created_at).toISOString().slice(0, 10)}</TableCell>
+                <TableCell className="text-gray-400">
+                  {project.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}
+                </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

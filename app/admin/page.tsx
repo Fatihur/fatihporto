@@ -57,7 +57,9 @@ export default async function AdminDashboard() {
                   <div className="font-medium">{project.title}</div>
                   <div className="text-sm text-gray-400">{project.category}</div>
                 </div>
-                <div className="text-sm text-gray-400">{new Date(project.created_at).toLocaleDateString()}</div>
+                <div className="text-sm text-gray-400">
+                  {project.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}
+                </div>
               </div>
             ))}
           </div>

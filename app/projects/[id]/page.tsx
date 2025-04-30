@@ -82,7 +82,7 @@ export default async function ProjectPage(props: ProjectPageProps) {
               </div>
               <div className="flex items-center text-gray-400 mb-6">
                 <Calendar className="h-4 w-4 mr-2" />
-                <span>{new Date(project.created_at).toLocaleDateString()}</span>
+                <span>{project.created_at ? new Date(project.created_at).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
 
