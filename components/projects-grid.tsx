@@ -10,18 +10,81 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useSearchParams } from "next/navigation"
 import type { Project } from "@/lib/db"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const ImageWithFallback = ({ src, alt, category, demoLink, githubLink, onDemoClick, onGithubClick }: { 
+  src: string; 
+  alt: string; 
+  category: string;
+  demoLink?: string;
+  githubLink?: string;
+  onDemoClick?: (e: React.MouseEvent) => void;
+  onGithubClick?: (e: React.MouseEvent) => void;
+}) => {
+  return (
+    <div className="relative w-full aspect-[4/3] overflow-hidden group">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-110"
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+        <div className="flex gap-2 w-full">
+          {demoLink && (
+            <Button 
+              size="sm" 
+              className="w-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+              onClick={onDemoClick}
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              Demo
+            </Button>
+          )}
+          {githubLink && (
+            <Button 
+              size="sm" 
+              className="w-full bg-white/10 backdrop-blur-sm hover:bg-white/20"
+              onClick={onGithubClick}
+            >
+              <Github className="h-3 w-3 mr-1" />
+              Code
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="absolute top-3 right-3">
+        <Badge className={`bg-gradient-to-r ${
+          category === "design" ? "from-pink-600 to-purple-600" :
+          category === "networking" ? "from-blue-600 to-cyan-600" :
+          category === "data" ? "from-green-600 to-teal-600" :
+          "from-purple-600 to-pink-600"
+        } text-white border-0 text-xs`}>
+          {category}
+        </Badge>
+      </div>
+    </div>
+  )
+}
 
 export function ProjectsGrid() {
   const searchParams = useSearchParams()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
+  const limit = 6
 
   useEffect(() => {
     const fetchProjects = async () => {
       setLoading(true)
       try {
         const categoryParam = searchParams.get("category")
-        const url = categoryParam ? `/api/projects?category=${categoryParam}` : "/api/projects"
+        const url = categoryParam 
+          ? `/api/projects?category=${categoryParam}&page=${page}&limit=${limit}`
+          : `/api/projects?page=${page}&limit=${limit}`
 
         const response = await fetch(url)
         if (!response.ok) {
@@ -30,7 +93,12 @@ export function ProjectsGrid() {
         
         const data = await response.json()
         if (data.success) {
-          setProjects(data.projects)
+          if (page === 1) {
+            setProjects(data.projects)
+          } else {
+            setProjects(prev => [...prev, ...data.projects])
+          }
+          setHasMore(data.projects.length === limit)
         } else {
           console.error("Error fetching projects:", data.message)
           setProjects([])
@@ -44,7 +112,16 @@ export function ProjectsGrid() {
     }
 
     fetchProjects()
+  }, [searchParams, page])
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setPage(1)
   }, [searchParams])
+
+  const loadMore = () => {
+    setPage(prev => prev + 1)
+  }
 
   const getIcon = (category: string) => {
     switch (category) {
@@ -61,97 +138,87 @@ export function ProjectsGrid() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-      </div>
-    )
+  const handleDemoClick = (e: React.MouseEvent, url: string) => {
+    e.preventDefault()
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
-  if (projects.length === 0) {
+  const handleGithubClick = (e: React.MouseEvent, url: string) => {
+    e.preventDefault()
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  if (loading && projects.length === 0) {
     return (
-      <div className="text-center py-20">
-        <h3 className="text-xl font-semibold mb-2">No projects found</h3>
-        <p className="text-gray-400">No projects match the selected category.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:px-6 lg:px-8">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="bg-black/40 border border-purple-500/20 backdrop-blur-sm">
+            <Skeleton className="aspect-[4/3] w-full" />
+            <CardContent className="p-4">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-full mt-2" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {projects.map((project, index) => (
-        <motion.div
-          key={project.id}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: index * 0.1 }}
-          className="group"
-        >
-          <Card className="overflow-hidden bg-black/40 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/40 transition-all duration-300">
-            <div className="relative overflow-hidden">
-              <Image
-                src={project.image_url}
-                alt={project.title}
-                width={600}
-                height={400}
-                className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "";
-                  target.parentElement?.classList.add("bg-gradient-to-br", "from-purple-500/20", "to-pink-500/20");
-                  target.parentElement?.classList.add("flex", "items-center", "justify-center");
-                  const fallbackText = document.createElement("div");
-                  fallbackText.className = "text-white/50 font-medium";
-                  fallbackText.textContent = project.title;
-                  target.parentElement?.appendChild(fallbackText);
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                <div className="flex gap-2">
-                  {project.demo_link && (
-                    <Link href={project.demo_link} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="secondary" className="bg-white/10 backdrop-blur-sm">
-                        <ExternalLink className="h-4 w-4 mr-1" />
-                        Demo
-                      </Button>
-                    </Link>
-                  )}
-                  {project.github_link && (
-                    <Link href={project.github_link} target="_blank" rel="noopener noreferrer">
-                      <Button size="sm" variant="secondary" className="bg-white/10 backdrop-blur-sm">
-                        <Github className="h-4 w-4 mr-1" />
-                        Code
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
-              <div className="absolute top-3 right-3 p-2 rounded-full bg-black/50 backdrop-blur-sm border border-purple-500/30">
-                {getIcon(project.category)}
-              </div>
-            </div>
-            <CardContent className="p-4">
-              <Link href={`/projects/${project.id}`}>
-                <h3 className="text-xl font-bold mb-2 hover:text-purple-400 transition-colors">{project.title}</h3>
-              </Link>
-              <p className="text-gray-300 text-sm mb-4">{project.description}</p>
-              <div className="flex flex-wrap gap-2">
-                {project.tags.slice(0, 3).map((tag, tagIndex) => (
-                  <Badge key={tagIndex} variant="outline" className="border-purple-500/30 bg-purple-500/10">
-                    {tag}
-                  </Badge>
-                ))}
-                {project.tags.length > 3 && (
-                  <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10">
-                    +{project.tags.length - 3}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
+    <div className="space-y-6 px-4 md:px-6 lg:px-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {projects.map((project) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Link href={`/projects/${project.id}`}>
+              <Card className="bg-black/40 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/40 transition-colors cursor-pointer">
+                <ImageWithFallback
+                  src={project.image_url}
+                  alt={project.title}
+                  category={project.category}
+                  demoLink={project.demo_link}
+                  githubLink={project.github_link}
+                  onDemoClick={project.demo_link ? (e) => handleDemoClick(e, project.demo_link!) : undefined}
+                  onGithubClick={project.github_link ? (e) => handleGithubClick(e, project.github_link!) : undefined}
+                />
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold line-clamp-1">{project.title}</h3>
+                  <p className="text-gray-400 text-sm line-clamp-2 mt-2">{project.description}</p>
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {project.tags.slice(0, 3).map((tag, i) => (
+                      <Badge key={i} variant="outline" className="border-purple-500/30 bg-purple-500/10 text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                    {project.tags.length > 3 && (
+                      <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 text-xs">
+                        +{project.tags.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+      
+      {hasMore && (
+        <div className="flex justify-center mt-6">
+          <Button
+            onClick={loadMore}
+            variant="outline"
+            className="border-purple-500/30 hover:border-purple-500/50"
+            disabled={loading}
+          >
+            {loading ? "Loading..." : "Load More"}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

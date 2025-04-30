@@ -6,12 +6,14 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get("category")
+    const page = parseInt(searchParams.get("page") || "1")
+    const limit = parseInt(searchParams.get("limit") || "6")
 
     let projects
     if (category) {
-      projects = await getProjectsByCategory(category)
+      projects = await getProjectsByCategory(category, page, limit)
     } else {
-      projects = await getProjects()
+      projects = await getProjects(page, limit)
     }
 
     return NextResponse.json({ success: true, projects })

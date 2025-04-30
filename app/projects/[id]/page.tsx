@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Calendar, ExternalLink, Github } from "lucide-react"
 import { getProjectById } from "@/lib/db"
+import { Suspense } from "react"
 
 interface ProjectPageProps {
   params: {
@@ -15,16 +16,8 @@ interface ProjectPageProps {
 }
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
-  const id = Number.parseInt(params.id)
-
-  if (isNaN(id)) {
-    return {
-      title: "Project Not Found",
-    }
-  }
-
-  const project = await getProjectById(id)
-
+  const project = await getProjectById(Number(params.id))
+  
   if (!project) {
     return {
       title: "Project Not Found",
@@ -32,9 +25,24 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   }
 
   return {
-    title: `${project.title} | Portfolio`,
+    title: project.title,
     description: project.description,
   }
+}
+
+const ProjectImage = ({ src, alt }: { src: string; alt: string }) => {
+  return (
+    <div className="relative w-full h-64 md:h-96 overflow-hidden rounded-lg">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        className="object-cover"
+        loading="lazy"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  )
 }
 
 export default async function ProjectPage(props: ProjectPageProps) {
@@ -78,6 +86,10 @@ export default async function ProjectPage(props: ProjectPageProps) {
               </div>
             </div>
 
+            <Suspense fallback={<div className="h-64 bg-gray-800/50 animate-pulse rounded-lg" />}>
+              <ProjectImage src={project.image_url} alt={project.title} />
+            </Suspense>
+
             <div className="bg-black/40 border border-purple-500/20 backdrop-blur-sm rounded-lg p-6">
               <div className="prose prose-invert max-w-none">
                 {project.content ? (
@@ -90,20 +102,9 @@ export default async function ProjectPage(props: ProjectPageProps) {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-black/40 border border-purple-500/20 backdrop-blur-sm rounded-lg overflow-hidden">
-              <Image
-                src={project.image_url}
-                alt={project.title}
-                width={1200}
-                height={800}
-                className="w-full h-auto rounded-lg object-cover"
-              />
-            </div>
-
-            <div className="bg-black/40 border border-purple-500/20 backdrop-blur-sm rounded-lg p-6 space-y-4">
-              <h3 className="text-xl font-bold">Project Links</h3>
-
-              <div className="space-y-3">
+            <div className="bg-black/40 border border-purple-500/20 backdrop-blur-sm rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Project Links</h2>
+              <div className="space-y-4">
                 {project.demo_link && (
                   <Link href={project.demo_link} target="_blank" rel="noopener noreferrer">
                     <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
@@ -112,12 +113,11 @@ export default async function ProjectPage(props: ProjectPageProps) {
                     </Button>
                   </Link>
                 )}
-
                 {project.github_link && (
                   <Link href={project.github_link} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full border-purple-500/20 hover:bg-purple-500/10">
+                    <Button variant="outline" className="w-full border-purple-500/30 hover:border-purple-500/50">
                       <Github className="h-4 w-4 mr-2" />
-                      View Code
+                      View Source Code
                     </Button>
                   </Link>
                 )}

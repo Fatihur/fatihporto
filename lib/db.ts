@@ -1,6 +1,14 @@
 import { neon } from "@neondatabase/serverless"
+import { cache } from 'react'
 
-const db = neon(process.env.DATABASE_URL!)
+// Gunakan satu instance koneksi
+let db: any
+export function getDbConnection() {
+  if (!db) {
+    db = neon(process.env.DATABASE_URL!)
+  }
+  return db
+}
 
 export type Project = {
   id: number
@@ -16,49 +24,60 @@ export type Project = {
   updated_at: string
 }
 
-export async function getProjects() {
+export const getProjects = cache(async (page = 1, limit = 10) => {
+  const offset = (page - 1) * limit
   try {
-    const projects = await db`
-      SELECT * FROM projects ORDER BY created_at DESC
+    const projects = await getDbConnection()`
+      SELECT id, title, description, image_url, category, tags, demo_link, github_link
+      FROM projects 
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
     `
     return projects as Project[]
   } catch (error) {
     console.error("Error fetching projects:", error)
     return []
   }
-}
+})
 
-export async function getProjectsByCategory(category: string) {
+export const getProjectsByCategory = cache(async (category: string, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit
   try {
     if (category === "all") {
-      return getProjects()
+      return getProjects(page, limit)
     }
 
-    const projects = await db`
-      SELECT * FROM projects WHERE category = ${category} ORDER BY created_at DESC
+    const projects = await getDbConnection()`
+      SELECT id, title, description, image_url, category, tags, demo_link, github_link
+      FROM projects 
+      WHERE category = ${category} 
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
     `
     return projects as Project[]
   } catch (error) {
     console.error("Error fetching projects by category:", error)
     return []
   }
-}
+})
 
-export async function getProjectById(id: number) {
+export const getProjectById = cache(async (id: number) => {
   try {
-    const projects = await db`
-      SELECT * FROM projects WHERE id = ${id}
+    const projects = await getDbConnection()`
+      SELECT id, title, description, image_url, category, tags, demo_link, github_link, content
+      FROM projects 
+      WHERE id = ${id}
     `
     return projects[0] as Project | undefined
   } catch (error) {
     console.error("Error fetching project by id:", error)
     return undefined
   }
-}
+})
 
 export async function createProject(project: Omit<Project, "id" | "created_at" | "updated_at">) {
   try {
-    const result = await db`
+    const result = await getDbConnection()`
       INSERT INTO projects (
         title, description, image_url, category, tags, demo_link, github_link, content
       ) VALUES (
@@ -107,7 +126,7 @@ export async function updateProject(id: number, project: Partial<Omit<Project, "
       RETURNING *
     `
 
-    const result = await db.query(query)
+    const result = await getDbConnection().query(query)
     return { success: true, project: result.rows[0] as Project }
   } catch (error) {
     console.error("Error updating project:", error)
@@ -117,7 +136,7 @@ export async function updateProject(id: number, project: Partial<Omit<Project, "
 
 export async function deleteProject(id: number) {
   try {
-    await db`
+    await getDbConnection()`
       DELETE FROM projects WHERE id = ${id}
     `
     return { success: true }

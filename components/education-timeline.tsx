@@ -9,13 +9,13 @@ export function EducationTimeline() {
       degree: "Informatika",
       institution: "Universitas Teknologi Sumbawa",
       year: "2021 - 2025",
-      description: "Program Studi: Informatika | IPK 3.78 / 4.00",
+      description: "IPK 3.78 / 4.00",
     },
     {
       degree: "Teknik Komputer Jaringan",
       institution: "SMK Negeri 1 Sumbawa",
       year: "2017 - 2020",
-      description: "Jurusan: Teknik Komputer Jaringan",
+      description: "",
     },
   ]
 
