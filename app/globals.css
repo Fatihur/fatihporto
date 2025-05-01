@@ -62,6 +62,42 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Custom Cursor Styles */
+.cursor-dot {
+  width: 5px;
+  height: 5px;
+  background-color: #805AD5;
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 9999;
+  transition: transform 0.2s ease;
+}
+
+.cursor-outline {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #805AD5;
+  position: fixed;
+  pointer-events: none;
+  border-radius: 50%;
+  z-index: 9998;
+  transition: all 0.2s ease-out;
+}
+
+/* Hide default cursor */
+* {
+  cursor: none !important;
+}
+
+/* Cursor hover effects */
+a:hover ~ .cursor-outline,
+button:hover ~ .cursor-outline {
+  transform: scale(1.5);
+  background-color: rgba(128, 90, 213, 0.1);
+}
+
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 10px;
 }
