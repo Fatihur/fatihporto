@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { NavBarDemo } from "@/components/ui/tubelight-navbar-demo"
 import { CustomCursor } from "@/components/ui/custom-cursor"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
           <CustomCursor />
           <NavBarDemo />
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

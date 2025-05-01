@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -9,8 +8,12 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Send } from "lucide-react"
+import emailjs from '@emailjs/browser'
+import { useToast } from "@/components/ui/use-toast"
 
 export function ContactForm() {
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,17 +26,46 @@ export function ContactForm() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission logic here
-    console.log(formData)
-    alert("Thank you for your message! I'll get back to you soon.")
-    setFormData({
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    })
+    setIsLoading(true)
+
+    try {
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      }
+
+      await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
+        templateParams,
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+      )
+
+      toast({
+        title: "Success!",
+        description: "Thank you for your message! I'll get back to you soon.",
+      })
+
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      })
+    } catch (error) {
+      console.error('Error sending email:', error)
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -55,6 +87,7 @@ export function ContactForm() {
               onChange={handleChange}
               required
               className="bg-black/50 border-purple-500/20 focus:border-purple-500/50"
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -68,6 +101,7 @@ export function ContactForm() {
               onChange={handleChange}
               required
               className="bg-black/50 border-purple-500/20 focus:border-purple-500/50"
+              disabled={isLoading}
             />
           </div>
         </div>
@@ -82,6 +116,7 @@ export function ContactForm() {
             onChange={handleChange}
             required
             className="bg-black/50 border-purple-500/20 focus:border-purple-500/50"
+            disabled={isLoading}
           />
         </div>
 
@@ -95,15 +130,29 @@ export function ContactForm() {
             onChange={handleChange}
             required
             className="min-h-[150px] bg-black/50 border-purple-500/20 focus:border-purple-500/50"
+            disabled={isLoading}
           />
         </div>
 
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+          disabled={isLoading}
         >
-          <Send className="h-4 w-4 mr-2" />
-          Send Message
+          {isLoading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Sending...
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-2" />
+              Send Message
+            </>
+          )}
         </Button>
       </form>
     </motion.div>
