@@ -94,7 +94,7 @@ export function ProjectsGrid() {
         const data = await response.json()
         if (data.success) {
           if (page === 1) {
-            setProjects(data.projects)
+          setProjects(data.projects)
           } else {
             setProjects(prev => [...prev, ...data.projects])
           }
@@ -168,43 +168,43 @@ export function ProjectsGrid() {
     <div className="space-y-6 px-4 md:px-6 lg:px-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {projects.map((project) => (
-          <motion.div
-            key={project.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          key={project.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
             <Link href={`/projects/${project.id}`}>
               <Card className="bg-black/40 border border-purple-500/20 backdrop-blur-sm hover:border-purple-500/40 transition-colors cursor-pointer">
                 <ImageWithFallback
                   src={project.image_url}
-                  alt={project.title}
+                alt={project.title}
                   category={project.category}
                   demoLink={project.demo_link}
                   githubLink={project.github_link}
                   onDemoClick={project.demo_link ? (e) => handleDemoClick(e, project.demo_link!) : undefined}
                   onGithubClick={project.github_link ? (e) => handleGithubClick(e, project.github_link!) : undefined}
                 />
-                <CardContent className="p-4">
+            <CardContent className="p-4">
                   <h3 className="text-lg font-semibold line-clamp-1">{project.title}</h3>
                   <p className="text-gray-400 text-sm line-clamp-2 mt-2">{project.description}</p>
                   <div className="flex flex-wrap gap-1 mt-3">
                     {project.tags.slice(0, 3).map((tag, i) => (
                       <Badge key={i} variant="outline" className="border-purple-500/30 bg-purple-500/10 text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {project.tags.length > 3 && (
+                    {tag}
+                  </Badge>
+                ))}
+                {project.tags.length > 3 && (
                       <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 text-xs">
-                        +{project.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    +{project.tags.length - 3}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
             </Link>
-          </motion.div>
-        ))}
+        </motion.div>
+      ))}
       </div>
       
       {hasMore && (

@@ -26,7 +26,7 @@ export function ProjectFilter() {
   const handleFilterChange = (filterId: string) => {
     setActiveFilter(filterId)
     console.log("Filter diklik:", filterId)
-    
+
     // Update URL dengan category yang dipilih
     const params = new URLSearchParams(searchParams.toString())
     if (filterId === "all") {

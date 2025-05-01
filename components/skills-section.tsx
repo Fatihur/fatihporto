@@ -60,20 +60,20 @@ export function SkillsSection() {
             className="relative bg-black/40 border border-purple-500/20 backdrop-blur-sm rounded-xl p-6 hover:border-purple-500/40 transition-all duration-300"
           >
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${category.color} text-white`}>{category.icon}</div>
-                <h3 className="text-xl font-bold text-white">{category.category}</h3>
-              </div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`p-2 rounded-lg bg-gradient-to-br ${category.color} text-white`}>{category.icon}</div>
+              <h3 className="text-xl font-bold text-white">{category.category}</h3>
+            </div>
 
-              <div className="flex flex-wrap gap-2">
-                {category.skills.map((skill, skillIndex) => (
-                  <span
-                    key={skillIndex}
-                    className="px-3 py-1 bg-white/5 border border-purple-500/20 rounded-full text-sm text-gray-200"
-                  >
-                    {skill}
-                  </span>
-                ))}
+            <div className="flex flex-wrap gap-2">
+              {category.skills.map((skill, skillIndex) => (
+                <span
+                  key={skillIndex}
+                  className="px-3 py-1 bg-white/5 border border-purple-500/20 rounded-full text-sm text-gray-200"
+                >
+                  {skill}
+                </span>
+              ))}
               </div>
             </div>
             <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">

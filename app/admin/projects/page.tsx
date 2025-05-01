@@ -17,9 +17,9 @@ export default async function ProjectsPage() {
         <Link href="/admin/projects/new" passHref legacyBehavior>
           <a>
             <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 cursor-pointer">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Project
-            </Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Project
+          </Button>
           </a>
         </Link>
       </div>

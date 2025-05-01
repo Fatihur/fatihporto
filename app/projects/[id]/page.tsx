@@ -17,7 +17,7 @@ interface ProjectPageProps {
 
 export async function generateMetadata({ params }: ProjectPageProps): Promise<Metadata> {
   const project = await getProjectById(Number(params.id))
-  
+
   if (!project) {
     return {
       title: "Project Not Found",
