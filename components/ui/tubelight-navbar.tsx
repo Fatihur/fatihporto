@@ -40,13 +40,14 @@ export function NavBar({ items, className }: NavBarProps) {
   if (!mounted) return null
 
   return (
-    <div
+    <nav
       className={cn(
-        "fixed bottom-0 sm:top-0 left-1/2 -translate-x-1/2 z-50 mb-6 sm:pt-6 pointer-events-none",
+        "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none",
+        "sm:bottom-auto sm:top-0 sm:pt-6",
         className,
       )}
     >
-      <div className="flex items-center justify-center gap-2 md:gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg pointer-events-auto min-w-[200px]">
+      <div className="flex items-center justify-center h-[52px] gap-2 md:gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg pointer-events-auto min-w-[200px]">
         {items.map((item) => {
           const Icon = item.icon
           const isActive = activeTab === item.name
@@ -60,7 +61,7 @@ export function NavBar({ items, className }: NavBarProps) {
               className={cn(
                 "relative cursor-pointer text-sm font-semibold transition-all duration-300",
                 "flex items-center justify-center",
-                "px-4 md:px-6 py-2",
+                "h-10 px-4 md:px-6",
                 "rounded-full min-w-[40px] md:min-w-[80px]",
                 "text-foreground/80 hover:text-primary hover:bg-primary/5",
                 isActive && "bg-muted text-primary",
@@ -102,6 +103,6 @@ export function NavBar({ items, className }: NavBarProps) {
           )
         })}
       </div>
-    </div>
+    </nav>
   )
 } 
